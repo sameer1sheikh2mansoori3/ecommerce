@@ -1,6 +1,7 @@
 const Product = require("../models/productModel");
+const ErrorHandler = require("../utils/errorhander");
 // const ErrorHander = require("../utils/errorhander");
-// const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 // const ApiFeatures = require("../utils/apifeatures");
 // const cloudinary = require("cloudinary");
 
@@ -47,9 +48,7 @@ exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
     if (!products) {
-      return res.json({
-        message: "no product found",
-      });
+      return next(new ErrorHandler("pork product is not found", 404));
     }
     return res.json({
       message: products,
@@ -83,9 +82,7 @@ exports.deleteProduct = async (req, res) => {
     _id: id,
   });
   if (!findProduct) {
-    return res.json({
-      message: "why are you gay??",
-    });
+    return next(new ErrorHandler("pork product is not found", 404));
   }
   const deletedData = await Product.findByIdAndDelete(id);
   return res.json({
@@ -98,15 +95,19 @@ exports.deleteProduct = async (req, res) => {
 // Get All Product (Admin)
 
 // Get Product Details
-exports.getProductDetails = async (req, res) => {
-  const product = await Product.findById(req.params.id);
+exports.getProductDetails = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
 
-  if (!product) {
-    return res.json({ message: "Product not found" });
+    if (!product) {
+      return next(new ErrorHandler("pork product is not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      product,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, error.code));
   }
-
-  res.status(200).json({
-    success: true,
-    product,
-  });
 };
