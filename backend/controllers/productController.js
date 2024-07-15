@@ -1,12 +1,12 @@
 const Product = require("../models/productModel");
 const ErrorHandler = require("../utils/errorhander");
-// const ErrorHander = require("../utils/errorhander");
+const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 // const ApiFeatures = require("../utils/apifeatures");
 // const cloudinary = require("cloudinary");
 
 // Create Product -- Admin
-exports.createProduct = async (req, res) => {
+exports.createProduct = catchAsyncErrors(async (req, res) => {
   // let images = [];
 
   // if (typeof req.body.images === "string") {
@@ -41,10 +41,9 @@ exports.createProduct = async (req, res) => {
   } catch (error) {
     console.log(error.message);
   }
-};
-
+});
 // Get All Product
-exports.getAllProducts = async (req, res) => {
+exports.getAllProducts = catchAsyncErrors(async (req, res) => {
   try {
     const products = await Product.find();
     if (!products) {
@@ -57,9 +56,9 @@ exports.getAllProducts = async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-};
+});
 
-exports.changeProduct = async (req, res) => {
+exports.changeProduct = catchAsyncErrors(async (req, res) => {
   const _id = req.params.id;
   const data = req.body;
   const changeData = await Product.findByIdAndUpdate(
@@ -74,9 +73,9 @@ exports.changeProduct = async (req, res) => {
   return res.json({
     data: changeData,
   });
-};
+});
 
-exports.deleteProduct = async (req, res) => {
+exports.deleteProduct = catchAsyncErrors(async (req, res) => {
   const { id } = req.params;
   const findProduct = await Product.findById({
     _id: id,
@@ -90,24 +89,20 @@ exports.deleteProduct = async (req, res) => {
     success: true,
     payload: deletedData,
   });
-};
+});
 
 // Get All Product (Admin)
 
 // Get Product Details
-exports.getProductDetails = async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id);
+exports.getProductDetails = catchAsyncErrors(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
 
-    if (!product) {
-      return next(new ErrorHandler("pork product is not found", 404));
-    }
-
-    res.status(200).json({
-      success: true,
-      product,
-    });
-  } catch (error) {
-    return next(new ErrorHandler(error.message, error.code));
+  if (!product) {
+    return next(new ErrorHandler("pork product is not found", 404));
   }
-};
+
+  res.status(200).json({
+    success: true,
+    product,
+  });
+});
