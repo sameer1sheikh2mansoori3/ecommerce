@@ -15,7 +15,7 @@ const {
 const router = express.Router();
 
 router.route("/product/new").post(createProduct);
-router.route("/product/getAllProducts").get(getAllProducts);
+router.route("/product").get(getAllProducts);
 router.route("/product/:id").put(changeProduct);
 router.route("/product/:id").delete(deleteProduct).get(getProductDetails);
 

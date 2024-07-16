@@ -2,6 +2,7 @@ const Product = require("../models/productModel");
 const ErrorHandler = require("../utils/errorhander");
 const ErrorHander = require("../utils/errorhander");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const ApiFeatures = require("../utils/apifeatures");
 // const ApiFeatures = require("../utils/apifeatures");
 // const cloudinary = require("cloudinary");
 
@@ -95,14 +96,26 @@ exports.deleteProduct = catchAsyncErrors(async (req, res) => {
 
 // Get Product Details
 exports.getProductDetails = catchAsyncErrors(async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
+  const resultPerPage = 8;
+  const productsCount = await Product.countDocuments();
 
-  if (!product) {
-    return next(new ErrorHandler("pork product is not found", 404));
-  }
+  const apiFeature = new ApiFeatures(Product.find(), req.query)
+    .search()
+    .filter();
+
+  let products = await apiFeature.query;
+
+  let filteredProductsCount = products.length;
+
+  apiFeature.pagination(resultPerPage);
+
+  products = await apiFeature.query;
 
   res.status(200).json({
     success: true,
-    product,
+    products,
+    productsCount,
+    resultPerPage,
+    filteredProductsCount,
   });
 });
